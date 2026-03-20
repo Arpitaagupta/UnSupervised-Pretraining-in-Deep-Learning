@@ -1,99 +1,88 @@
-# Unsupervised Layer-wise Pretraining in Deep Neural Networks
+# Layer-wise Pretraining in Deep Neural Networks on MNIST
 
-This implementation demonstrates layer-wise pretraining of a deep neural network on the MNIST dataset. The objective is to understand how sequential training of layers affects convergence and performance compared to standard training from scratch.
+This implementation demonstrates greedy layer-wise pretraining in a deep neural network using the MNIST dataset. The objective is to analyze how sequential training of layers improves model performance compared to training a deep network from scratch.
 
-The network is trained under two conditions:
+The experiment follows a structured pipeline where each hidden layer is trained individually, and the learned weights are reused to initialize a deeper network. The final model is then fine-tuned using supervised learning.
 
-1. With layer-wise pretraining  
-2. Without pretraining  
+A comparison is performed between:
 
-A comparison is performed to analyze the effectiveness of pretraining.
+Without pretraining  
+With layer-wise pretraining  
 
-## Problem Statement
+## Objective
 
-Train a deep neural network with the following specifications:
+To implement and evaluate layer-wise pretraining in a deep neural network with the following configuration:
 
 Input Layer: 28 × 28 flattened to 784  
-Hidden Layers:  
-First hidden layer: 16 neurons  
-Remaining hidden layers: 8 neurons each  
+
+Hidden Layers:
+First hidden layer: 512 neurons  
+Second and third: 256 neurons  
+Fourth to sixth: 128 neurons  
+Seventh to ninth: 64 neurons  
+Tenth hidden layer: 32 neurons  
+
 Total hidden layers: 10  
+
 Activation Function: Sigmoid  
 Dropout: 0.2  
 Output Layer: 10 neurons with Softmax  
-Epochs: 10  
-
-## Concept of Unsupervised Pretraining
-
-Unsupervised pretraining is a technique where each layer of a deep neural network is trained sequentially before performing full supervised training.
-
-Instead of initializing all weights randomly, each layer learns meaningful representations from the input data step by step. This improves the initial weight configuration and helps the network converge more effectively.
-
-In this implementation, layers are trained in a greedy layer-wise manner. Each layer is trained using classification loss with respect to ground truth labels while keeping previously trained layers fixed.
-
-The training flow is:
-
-Input → Hidden Layer 1  
-Hidden Layer 1 → Hidden Layer 2  
-Hidden Layer 2 → Hidden Layer 3  
-Hidden Layer 3 → Hidden Layer 4  
-Hidden Layer 4 → Hidden Layer 5  
-Hidden Layer 5 → Hidden Layer 6  
-Hidden Layer 6 → Hidden Layer 7  
-Hidden Layer 7 → Hidden Layer 8  
-Hidden Layer 8 → Hidden Layer 9  
-Hidden Layer 9 → Hidden Layer 10  
-Hidden Layer 10 → Output  
-
-Each layer progressively learns higher-level features.
-
-## Methodology
-
-### Layer-wise Pretraining
-
-Train one layer at a time using input data and labels  
-Freeze previously trained layers  
-Update only the current layer’s weights  
-Repeat for all hidden layers  
-
-### Fine Tuning
-
-Unfreeze all layers  
-Train the complete network using supervised learning  
-Optimize all weights jointly  
-
-### Baseline Model
-
-Same architecture  
-Trained from scratch using random initialization  
-Used for comparison  
-
-## Architecture
-
-784 → 16 → 8 → 8 → 8 → 8 → 8 → 8 → 8 → 8 → 8 → 10  
-
-Sigmoid activation in hidden layers  
-Softmax activation in output layer  
-Dropout = 0.2  
+Epochs:
+Pretraining: 10 per layer  
+Fine-tuning: 20  
+Baseline: 20  
 
 ## Dataset
 
-MNIST dataset:
+MNIST handwritten digit dataset:
 
 60,000 training samples  
 10,000 testing samples  
-Handwritten digit images (0–9)  
+Grayscale images of size 28 × 28  
+
+## Methodology
+
+### Baseline Model
+
+A deep neural network with 10 hidden layers is trained using random weight initialization. This serves as the reference model.
+
+### Layer-wise Pretraining
+
+Each hidden layer is trained sequentially using the following approach:
+
+Build a partial network up to the current layer  
+Train the network using labeled data  
+Freeze previously trained layers  
+Update only the current layer and output layer  
+Store the learned weights  
+
+This process is repeated for all 10 hidden layers.
+
+### Fine Tuning
+
+After pretraining:
+
+All layers are unfrozen  
+The complete network is trained jointly  
+Weights are refined using backpropagation  
+
+## Architecture
+
+784 → 512 → 256 → 256 → 128 → 128 → 128 → 64 → 64 → 64 → 32 → 10  
+
+Sigmoid activation is used in hidden layers  
+Softmax is used in the output layer  
+Dropout of 0.2 is applied after each hidden layer  
 
 ## Training Details
 
 Optimizer: Adam  
-Loss Function: Negative Log Likelihood Loss  
-Batch Size: 64  
-Epochs: 10  
+Loss Function: Categorical Crossentropy  
+Batch Size: 128  
 
 ## Results
 
-### Final Comparison
+### Final Performance Comparison
 
 Without Pre-training  
 Accuracy: 11.35 %  
@@ -103,20 +92,22 @@ With Pre-training
 Accuracy: 98.27 %  
 Loss: 0.1201  
 
-Overall Improvement in Accuracy: 86.92 %
+Improvement in Accuracy: 86.92 %
 
-The results clearly show that layer-wise pretraining significantly improves model performance by enabling better weight initialization and faster convergence.
 
-## Key Observations
+## Observations
 
-Pretraining provides better weight initialization  
-Deep networks learn more effectively when trained layer-wise  
-Convergence is faster compared to training from scratch  
-Final accuracy improves significantly  
+The model trained without pretraining fails to learn effectively and remains near random guessing.
+
+Layer-wise pretraining enables each layer to learn meaningful representations before full training.
+
+The pretrained model converges faster and achieves significantly higher accuracy.
+
+Weight initialization plays a critical role in training deep neural networks.
+
+
 
 ## Conclusion
 
-This implementation demonstrates that layer-wise pretraining can drastically enhance the performance of deep neural networks. By training layers sequentially, the model develops meaningful feature representations before full optimization, leading to improved accuracy and stability.
-
-
+This implementation demonstrates that greedy layer-wise pretraining significantly enhances the performance of deep neural networks. By training layers sequentially, the model develops strong feature representations, leading to improved convergence and accuracy compared to standard training.
 
